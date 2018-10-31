@@ -88,4 +88,3 @@ client.on('messageReactionRemove', (reaction, user) => {
 });
 
 
-client.login('NTA2OTg3MzY4MDU0NjUyOTM5.DrqIoA.234HXqhPh2pmj7G78tl5WJ7RbMo');
