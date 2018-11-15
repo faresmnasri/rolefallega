@@ -1,91 +1,195 @@
+const prefix ="!";
 const Discord = require('discord.js');
 const client = new Discord.Client();
-const prefix = '-'
- 
+
+
 client.on('ready', () => {
-  console.log(`Logged in as ${client.user.tag}!`);
-client.user.setGame(`FALLEGA TEAM|*help`,"http://twitch.tv/S-F")
-  console.log('')
-  console.log('')
-  console.log('╔[═════════════════════════════════════════════════════════════════]╗')
-  console.log(`[Start] ${new Date()}`);
-  console.log('╚[═════════════════════════════════════════════════════════════════]╝')
-  console.log('')
-  console.log('╔[════════════════════════════════════]╗');
-  console.log(`Logged in as * [ " ${client.user.username} " ]`);
-  console.log('')
-  console.log('Informations :')
-  console.log('')
-  console.log(`servers! [ " ${client.guilds.size} " ]`);
-  console.log(`Users! [ " ${client.users.size} " ]`);
-  console.log(`channels! [ " ${client.channels.size} " ]`);
-  console.log('╚[════════════════════════════════════]╝')
-  console.log('')
-  console.log('╔[════════════]╗')
-  console.log(' Bot Is Online')
-  console.log('╚[════════════]╝')
-  console.log('')
-  console.log('')
+    console.log(`Logged in as ${client.user.tag}!`);
+client.user.setGame(`FALLEGA TEAM|!FLG`,"http://twitch.tv/S-F")
+    console.log('')
+    console.log('')
+    console.log('╔[═════════════════════════════════════════════════════════════════]╗')
+    console.log(`[Start] ${new Date()}`);
+    console.log('╚[═════════════════════════════════════════════════════════════════]╝')
+    console.log('')
+    console.log('╔[════════════════════════════════════]╗');
+    console.log(`Logged in as * [ " ${client.user.username} " ]`);
+    console.log('')
+    console.log('Informations :')
+    console.log('')
+    console.log(`servers! [ " ${client.guilds.size} " ]`);
+    console.log(`Users! [ " ${client.users.size} " ]`);
+    console.log(`channels! [ " ${client.channels.size} " ]`);
+    console.log('╚[════════════════════════════════════]╝')
+    console.log('')
+    console.log('╔[════════════]╗')
+    console.log(' Bot Is Online')
+    console.log('╚[════════════]╝')
+    console.log('')
+    console.log('')
 });
 
 
 
 
-var stopReacord = true;
-var reactionRoles = [];
-var definedReactionRole = null;
+const ownerid = '373892191791087617'
+client.colors = {}
 
-client.on("message", async message => {
-    const args = message.content.slice(prefix.length).trim().split(/ +/g);
-    const command = args.shift().toLowerCase();
-    if(message.author.bot) return;
-    if(message.content.indexOf(prefix) !== 0) return;
-    if (command == "autoc") {
-      if(!message.channel.guild) return message.reply(`**this ~~command~~ __for servers only__**`);
-      if(!message.member.hasPermission("ADMINISTRATOR")) return message.channel.send("sorry you can't do this");
-      if(!args[0] || args[1]) return message.channel.send(`\`\`\`${prefix}autoC <role-name>\`\`\``);
-      var role = message.guild.roles.find( role => { return role.name == args[0] });
-      if(!role) return message.channel.send(`no role with name ${definedRoleName} found, make sure you entered correct name`);
-      if(definedReactionRole != null  || !stopReacord) return message.channel.send("another reaction role request is running");
-      message.channel.send(`5AYER ROLE TA5OU :arrow_right:  ${role.name}`);
-      definedReactionRole = role;
-      stopReacord = false;
-    }     
-})
-client.on('raw', raw => {
-  if (!['MESSAGE_REACTION_ADD', 'MESSAGE_REACTION_REMOVE'].includes(raw.t)) return;
-  var channel = client.channels.get(raw.d.channel_id);
-  if (channel.messages.has(raw.d.message_id)) return;
-  channel.fetchMessage(raw.d.message_id).then(message => {
-    var reaction = message.reactions.get( (raw.d.emoji.id ? `${raw.d.emoji.name}:${raw.d.emoji.id}` : raw.d.emoji.name) );
-    if (raw.t === 'MESSAGE_REACTION_ADD') return client.emit('messageReactionAdd', reaction, client.users.get(raw.d.user_id));
-    if (raw.t === 'MESSAGE_REACTION_REMOVE') return client.emit('messageReactionRemove', reaction, client.users.get(raw.d.user_id));
+//let rainbow = 0;
+
+ client.on("ready", async () => {
+    console.log(`Logged in as ${client.user.tag}!`);
+
+    client.user.setGame(`☆ Store Games ☆`, {type: "2"});
+
   });
-});
-client.on('messageReactionAdd', (reaction, user) => {
-    if(user.id == client.user.id) return;
-    if(!stopReacord) {
-      var done = false;
-      reactionRoles[reaction.message.id] = { role: definedReactionRole, message_id: reaction.message.id, emoji: reaction.emoji};
-      stopReacord =  true;
-      definedReactionRole = null;
-      reaction.message.react(reaction.emoji.name)
-      .catch(err => {done = true; reaction.message.channel.send(`sorry i can't use this emoji but the reaction role done! anyone react will get the role!`)})
-      if(done) reaction.remove(user); 
-    } else {
-      var request = reactionRoles[reaction.message.id];
-      if(!request) return;
-      if(request.emoji.name != reaction.emoji.name) return reaction.remove(user);
-      reaction.message.guild.members.get(user.id).addRole(request.role);
+    client.setInterval(() =>{
+
+        //adding this so it doesnt start doing weird stuff
+        //try to change role color for every server
+        for(let i in client.colors) {
+            let guildId = client.colors[i].guild;
+            let guild = client.guilds.get(guildId);
+            let date = client.colors[i].date;
+
+
+            //if 72 hours have passed, remove from config
+            if(date < new Date().getTime() - 259200000) {
+                 delete client.colors[i];
+                return;
+            }
+
+            //if server gets deleted or bot gets kicked, remove from config
+            if(guild === null) {
+                delete client.colors[i];
+                return;
+            }
+            //try to change the role
+            try{
+                guild.roles.find("name", client.colors[i].role).setColor(rainbow[place])
+                
+                .catch(err => { 
+                    delete client.colors[i]
+                   
+                    return;
+                });
+            }catch(err){
+                delete client.colors[i]
+                return;
+            }
+        }
+        	if(place == (size - 1)) {
+			place = 0;
+		} else {
+			place++;
+		}
+        //Every 10 seconds change it
+    }, 500)
+
+
+client.on('message', message => {
+    var prefix = "!"
+  if (message.author.x5bz) return;
+  if (!message.content.startsWith(prefix)) return;
+
+  let command = message.content.split(" ")[0];
+  command = command.slice(prefix.length);
+
+  let args = message.content.split(" ").slice(1);
+    if(command === "stats") {
+        var time = process.uptime();
+        var uptime = (time + "").toHHMMSS();
+
+        const embed = new Discord.RichEmbed()
+        .setTitle(":tools: Stats")
+        .setColor(0x009688)
+        .setDescription( 
+        ":crown: " +              "Servers: " + client.guilds.size + "\n" + 
+        ":bust_in_silhouette: " + "Users: " + client.users.size + "\n" + 
+        ":clock12: " +            "Uptime: " + uptime)
+        message.channel.send({embed});
     }
-}) 
-client.on('messageReactionRemove', (reaction, user) => {
-  if(user.id == client.user.id) return;
-  if(!stopReacord) return;
-  let request = reactionRoles[reaction.message.id];
-  if(!request) return;
-  reaction.message.guild.members.get(user.id).removeRole(request.role);
+    if(command === "FLG") {
+        if(!message.member.hasPermission("ADMINISTRATOR")) {
+            const embed = new Discord.RichEmbed()
+            .setAuthor("FLG", client.user.avatarURL)
+            .setColor(0x4336F4)
+            .setDescription("LAZEM IKOUN 3ANDEK ADMINISTRATEUR PERMESSION!")
+            message.channel.send({embed});
+            return;
+        }
+
+        if(!message.guild.me.hasPermission("ADMINISTRATOR")) {
+            const embed = new Discord.RichEmbed()
+            .setAuthor("FLG", client.user.avatarURL)
+            .setColor(0x4336F4)
+            .setDescription("LAZEM IKOUN 3ANDI ADMINISTRATEUR PERMESSION!!")
+            message.channel.send({embed});
+            return;
+        }
+		
+		if(!message.member.guild.roles.find("name", args.join(" "))) {
+            const embed = new Discord.RichEmbed()
+            .setAuthor("FLG", client.user.avatarURL)
+            .setColor(0x4336F4)
+            .setDescription("IKTIB: **`*FLG (role name)`**")
+            message.channel.send({embed});
+            return;
+        }
+
+        if(message.member.guild.roles.find("name", args.join(" ")) === null) {
+            const embed = new Discord.RichEmbed()
+            .setAuthor("FLG", client.user.avatarURL)
+            .setColor(0x4336F4)
+            .setDescription("FAMA 7AJA 8ALTA.")
+            message.channel.send({embed});
+            return;
+        }
+
+
+        if(message.member.guild.roles.find("name", args.join(" ")).position >= message.guild.me.highestRole.position) {
+            const embed = new Discord.RichEmbed()
+            .setAuthor("FLG", client.user.avatarURL)
+            .setColor(0x4336F4)
+            .setDescription("LAZEM IKOUN ROLE MTA3I A3LA MINOU !  ")
+            message.channel.send({embed});
+            return;
+        }
+
+
+        const embed = new Discord.RichEmbed()
+        .setAuthor("Rainbow", client.user.avatarURL)
+        .setColor(0xE7F436)
+        .setDescription("RAINBOW COLOR DONE T7AT IL ROLE **`" + args.join(" ") + "`**" + "\n" +
+        "Note: WA9T MAYA7BESS IL RAINBOW 3AWED 7OT IL COMMAND")
+        message.channel.send({embed});
+
+        client.colors[message.guild.name] = {
+            guild: message.guild.id,
+            role: args.join(" "),
+            date: new Date().getTime()
+        }
+
+    }
 });
 
+
+const size    = 12
+const rainbow = new Array(size);
+
+for (var i=0; i<size; i++) {
+	var red   = sin_to_hex(i, 0 * Math.PI * 2/3); // 0   deg
+	var blue  = sin_to_hex(i, 1 * Math.PI * 2/3); // 120 deg
+	var green = sin_to_hex(i, 2 * Math.PI * 2/3); // 240 deg
+	rainbow[i] = '#'+ red + green + blue;
+}
+function sin_to_hex(i, phase) {
+	var sin = Math.sin(Math.PI / size * 2 * i + phase);
+	var int = Math.floor(sin * 127) + 128;
+	var hex = int.toString(16);
+
+	return hex.length === 1 ? '0'+hex : hex;
+}
+let place = 0;
 
 client.login(process.env.BOT_TOKEN);
